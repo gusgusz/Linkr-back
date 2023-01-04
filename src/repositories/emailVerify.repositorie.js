@@ -1,6 +1,6 @@
 import { connectionDb } from "../database/db.js";
 
-export default async function emailVerifyRepositorie(email) {
+export default async function emailVerifyRepositorie(res , email) {
     try {
         const emailRegistered = await connectionDb.query("SELECT * FROM users WHERE email = $1;" , [email]);
 
@@ -10,5 +10,6 @@ export default async function emailVerifyRepositorie(email) {
 
     } catch (error) {
         console.log(error);
+        res.sendStatus(500);
     }
 };
