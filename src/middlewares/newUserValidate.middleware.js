@@ -1,4 +1,4 @@
-import { newUserSchema } from "../models/schemas.js";
+import newUserSchema from "../models/newUser.schema.js";
 
 export default function newUserValidateMiddleware(user) {
 
