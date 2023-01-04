@@ -7,5 +7,4 @@ const newUserSchema = Joi.object({
     pictureUrl: Joi.string().uri().required()
 });
 
-
 export default newUserSchema;
