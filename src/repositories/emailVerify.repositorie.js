@@ -4,7 +4,7 @@ export default async function emailVerifyRepositorie(res , email) {
     try {
         const emailRegistered = await connectionDb.query("SELECT * FROM users WHERE email = $1;" , [email]);
 
-        if(emailRegistered.rows.length > 0) return true;
+        if(emailRegistered.rows.length > 0) return emailRegistered;
 
         return false;
 
