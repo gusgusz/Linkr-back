@@ -9,3 +9,4 @@ export default async function insertNewUserRepositorie(res,newUser) {
         res.sendStatus(500);
     };
 };
+
