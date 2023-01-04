@@ -7,16 +7,11 @@ export default async function signUpController(req,res) {
     try {
         const user = req.body;
 
-        //verificação do objeto eviado pelo body:
-        const validation = newUserValidateMiddleware(user);
-
-        if(validation.errorsList) {
-            return res.status(400).send(validation.errorsList);
-        };
-
         // verificação se o email já está cadasrado no DB:
-        const emailExist = await emailVerifyRepositorie(res,user.email);
+        const emailExist = await emailVerifyRepositorie(user.email);
 
+        console.log(emailExist);
+        
         if(emailExist){
             return res.status(409).send("email já cadastrado");
         }
@@ -27,7 +22,7 @@ export default async function signUpController(req,res) {
             password: bcrypt.hashSync(user.password, 10)
         };
         
-        await insertNewUserRepositorie(res,newUser);
+        await insertNewUserRepositorie(res , newUser);
 
         res.sendStatus(201);
 
