@@ -8,8 +8,6 @@ export default async function emailVerifyRepositorie(email) {
 
         return false;
 
-        console.log(emailRegistered.rows.length);
-
     } catch (error) {
         console.log(error);
     }
