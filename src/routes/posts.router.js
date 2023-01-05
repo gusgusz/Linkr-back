@@ -9,4 +9,3 @@ router.get("/timeline", getPosts);
 router.post("/timeline", tokenValidation, postBodyValidation, postPosts);
 
 export default router;
-
