@@ -1,4 +1,8 @@
 import { connectionDb } from "../database/db.js";
+import { userRepository } from "../repositories/getUser.repository.js";
+import insertNewPostRepository from "../repositories/insertNewPost.repository.js";
+import urlMetadata from "url-metadata";
+import { connectionDb } from "../database/db.js";
 import urlMetadata from "url-metadata";
 
 
@@ -33,5 +37,22 @@ export const getPosts = async (req, res) => {
   } catch (error) {
     console.log(error);
     res.status(500).send("An error occurred while trying to fetch the posts, please refresh the page");
+  }
+}
+
+export const postPosts = async (req, res) =>{
+  try{
+    const { authorization } = req.headers;
+        const token = authorization.replace('Bearer ', '');
+
+        const userId = await userRepository.getUser(token);
+
+        const {url, caption} = req.body;
+
+        await insertNewPostRepository(res, url, caption, userId);
+    
+        res.sendStatus(201);
+  } catch (err){
+    res.status(500).send(err.message);
   }
 }
