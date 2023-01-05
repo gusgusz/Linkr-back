@@ -7,7 +7,7 @@ export const getPosts = async (req, res) => {
 
   try{
   const response = await connectionDb.query(
-    `SELECT users.username, posts.url FROM posts JOIN users ON posts."userId" = users.id 
+    `SELECT users.username, users."pictureUrl", posts.url FROM posts JOIN users ON posts."userId" = users.id 
     ORDER BY posts."createdAt" DESC
      
       ;`
