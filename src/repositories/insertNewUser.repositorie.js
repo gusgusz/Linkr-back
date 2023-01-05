@@ -8,7 +8,6 @@ export default async function insertNewUserRepositorie(res , newUser) {
 
     } catch (error) {
         console.log(error);
-        console.log('ixa,deu ruim');
         res.status(503).send(error.message);
     };
 };
