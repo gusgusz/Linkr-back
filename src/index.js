@@ -3,6 +3,7 @@ import cors from "cors";
 import routerPosts from "./routes/routerPosts.js";
 import dotenv from "dotenv";
 import authRouter from './routes/auth.router.js';
+import deletePostRouter from './routes/deletePost.router.js';
 dotenv.config();
 
 const app = express();
@@ -11,9 +12,9 @@ app.use(express.json());
 // app.use(express.urlencoded({ extended: true }));
 app.use(routerPosts);
 
-
-
 app.use(authRouter);
+
+app.use(deletePostRouter);
 
 const Port = process.env.PORT || 5000;
 
