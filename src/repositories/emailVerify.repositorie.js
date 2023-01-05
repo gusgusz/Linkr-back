@@ -10,6 +10,6 @@ export default async function emailVerifyRepositorie(res , email) {
 
     } catch (error) {
         console.log(error);
-        res.sendStatus(500);
+        res.status(500).send(error.message);
     }
 };
