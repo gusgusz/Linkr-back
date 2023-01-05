@@ -18,6 +18,10 @@ export const getPosts = async (req, res) => {
     const data = response.rows;
     
     const posts = await Promise.all(data.map(async (post) => {
+      if(post.caption.includes("#")){
+        const hashtags = post.caption.match(/#[a-zA-Z]+/g);
+        post.hashtags = hashtags;
+      }
       const { url } = post;
       const metadata = await urlMetadata(url);
       const { title, description, image } = metadata;
