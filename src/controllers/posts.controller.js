@@ -2,6 +2,10 @@ import { connectionDb } from "../database/db.js";
 import { userRepository } from "../repositories/getUser.repository.js";
 import insertNewPostRepository from "../repositories/insertNewPost.repository.js";
 import urlMetadata from "url-metadata";
+<<<<<<< HEAD
+=======
+
+>>>>>>> f8a690eefd1a010c6f1387a2311c62fd2ce8c436
 
 
 export const getPosts = async (req, res) => {
@@ -10,9 +14,7 @@ export const getPosts = async (req, res) => {
   try{
   const response = await connectionDb.query(
     `SELECT users.username, users."pictureUrl", posts.* FROM posts JOIN users ON posts."userId" = users.id 
-    ORDER BY posts."createdAt" DESC
-     
-      ;`
+    ORDER BY posts."createdAt" DESC;`
     );
     if(response.rowCount === 0) {
       return res.status(404).send("There are no posts yet");
