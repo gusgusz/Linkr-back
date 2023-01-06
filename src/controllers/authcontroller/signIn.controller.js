@@ -11,7 +11,7 @@ export default async function signInController(req, res){
         
         await authRepository.createSession(res, token, user.id);
 
-        return res.status(200).send(token);
+        return res.status(200).send({token , userId:user.id});
     
     } catch (error) {
 
