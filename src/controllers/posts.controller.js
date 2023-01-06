@@ -1,7 +1,6 @@
-import { connectionDb } from "../database/db.js";
+
 import { userRepository } from "../repositories/getUser.repository.js";
 import insertNewPostRepository from "../repositories/insertNewPost.repository.js";
-import urlMetadata from "url-metadata";
 import { connectionDb } from "../database/db.js";
 import urlMetadata from "url-metadata";
 
@@ -48,6 +47,8 @@ export const postPosts = async (req, res) =>{
         const userId = await userRepository.getUser(token);
 
         const {url, caption} = req.body;
+        const hashtags = caption.match(/#[a-zA-Z]+/g);
+       
 
         await insertNewPostRepository(res, url, caption, userId);
     
