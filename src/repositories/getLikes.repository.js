@@ -1,6 +1,6 @@
 import { connectionDb } from "../database/db.js";
 
-async function getLikes(postId, userId) {
+async function getMessageLikes(postId, userId) {
 
     const getCount = await connectionDb.query(
         `SELECT count("userId") AS "numberOfLikes" FROM "public"."likes" WHERE "postId"=$1;`,
@@ -23,5 +23,5 @@ async function getLikes(postId, userId) {
 }
 
 export const likeRepository = {
-	getLikes
+	getMessageLikes
 }
