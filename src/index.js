@@ -12,7 +12,7 @@ app.use(express.json());
 app.use(routerPosts);
 
 
-
+//https://projeto18-linkr-back.onrender.com
 app.use(authRouter);
 
 const Port = process.env.PORT || 5000;
