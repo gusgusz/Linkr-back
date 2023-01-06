@@ -42,8 +42,22 @@ export const postPosts = async (req, res) =>{
 
         const {url, caption} = req.body;
 
-        await insertNewPostRepository(res, url, caption, userId);
-    
+      const postId =  await insertNewPostRepository(res, url, caption, userId);
+      
+
+      
+      const hashtags = (caption.match(/#[\w\d]+/g)).map((hashtag) => {
+      return  ((hashtag.replace('#', '')).toLowerCase()).trim();});
+      console.log(hashtags);
+      const hashtagsId = await Promise.all(hashtags.map(async (hashtag) => {
+        const response = await connectionDb.query(`SELECT id FROM hashtags WHERE name = $1;`, [hashtag]);
+        if(response.rowCount === 0){
+          const response = await connectionDb.query(`INSERT INTO hashtags (name) VALUES ($1) RETURNING id;`, [hashtag]);
+          return response.rows[0].id;
+        } else {
+          return response.rows[0].id;
+        }
+      }));
         res.sendStatus(201);
   } catch (err){
     res.status(500).send(err.message);
