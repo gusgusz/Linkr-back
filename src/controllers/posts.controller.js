@@ -2,10 +2,6 @@ import { connectionDb } from "../database/db.js";
 import { userRepository } from "../repositories/getUser.repository.js";
 import insertNewPostRepository from "../repositories/insertNewPost.repository.js";
 import urlMetadata from "url-metadata";
-<<<<<<< HEAD
-=======
-
->>>>>>> f8a690eefd1a010c6f1387a2311c62fd2ce8c436
 
 
 export const getPosts = async (req, res) => {
