@@ -11,3 +11,4 @@ export default async function insertNewUserRepositorie(res , newUser) {
         res.status(503).send(error.message);
     };
 };
+
