@@ -1,8 +1,13 @@
 
 import { userRepository } from "../repositories/getUser.repository.js";
 import insertNewPostRepository from "../repositories/insertNewPost.repository.js";
+<<<<<<< HEAD
 import { connectionDb } from "../database/db.js";
 import urlMetadata from "url-metadata";
+=======
+
+
+>>>>>>> main
 
 
 export const getPosts = async (req, res) => {
@@ -11,9 +16,7 @@ export const getPosts = async (req, res) => {
   try{
   const response = await connectionDb.query(
     `SELECT users.username, users."pictureUrl", posts.* FROM posts JOIN users ON posts."userId" = users.id 
-    ORDER BY posts."createdAt" DESC
-     
-      ;`
+    ORDER BY posts."createdAt" DESC;`
     );
     if(response.rowCount === 0) {
       return res.status(404).send("There are no posts yet");
@@ -47,11 +50,23 @@ export const postPosts = async (req, res) =>{
         const userId = await userRepository.getUser(token);
 
         const {url, caption} = req.body;
-        const hashtags = caption.match(/#[a-zA-Z]+/g);
-       
 
-        await insertNewPostRepository(res, url, caption, userId);
-    
+      const postId =  await insertNewPostRepository(res, url, caption, userId);
+      
+
+      
+      const hashtags = (caption.match(/#[\w\d]+/g)).map((hashtag) => {
+      return  ((hashtag.replace('#', '')).toLowerCase()).trim();});
+      console.log(hashtags);
+      const hashtagsId = await Promise.all(hashtags.map(async (hashtag) => {
+        const response = await connectionDb.query(`SELECT id FROM hashtags WHERE name = $1;`, [hashtag]);
+        if(response.rowCount === 0){
+          const response = await connectionDb.query(`INSERT INTO hashtags (name) VALUES ($1) RETURNING id;`, [hashtag]);
+          return response.rows[0].id;
+        } else {
+          return response.rows[0].id;
+        }
+      }));
         res.sendStatus(201);
   } catch (err){
     res.status(500).send(err.message);
