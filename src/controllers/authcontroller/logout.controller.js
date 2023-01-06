@@ -1,4 +1,4 @@
-import { connectionDb } from "../database/db.js";
+import { connectionDb } from "../../database/db.js";
 
 export const LogOut = async (req, res) => {
     const { authorization } = req.headers;
