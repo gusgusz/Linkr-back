@@ -4,7 +4,6 @@ import insertNewPostRepository from "../repositories/insertNewPost.repository.js
 import urlMetadata from "url-metadata";
 
 
-
 export const getPosts = async (req, res) => {
   
 
