@@ -3,6 +3,7 @@ import cors from "cors";
 import routerPosts from "./routes/posts.router.js";
 import dotenv from "dotenv";
 import authRouter from './routes/auth.router.js';
+import likeRouter from './routes/likes.router.js';
 dotenv.config();
 
 const app = express();
@@ -10,10 +11,8 @@ app.use(cors());
 app.use(express.json());
 // app.use(express.urlencoded({ extended: true }));
 app.use(routerPosts);
-
-
-
 app.use(authRouter);
+app.use(likeRouter);
 
 const Port = process.env.PORT || 5000;
 

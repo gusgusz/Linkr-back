@@ -22,6 +22,22 @@ async function getLikes(postId, userId) {
     return message
 }
 
-export const likeRepository = {
-	getLikes
+async function createLike(postId, userId){
+
+    return await connectionDb.query(`INSERT INTO likes ("userId", "postId") VALUES ($1, $2);`, [userId, postId]);
+
 }
+
+async function deleteLike(postId, userId){
+
+    return await connectionDb.query(`DELETE FROM likes WHERE "userId"=$1 AND "postId"=$2;`, [userId, postId]);
+
+}
+
+const likeRepository = {
+	getLikes,
+    createLike,
+    deleteLike
+};
+
+export default likeRepository;
