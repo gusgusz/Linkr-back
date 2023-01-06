@@ -1,13 +1,10 @@
 
 import { userRepository } from "../repositories/getUser.repository.js";
 import insertNewPostRepository from "../repositories/insertNewPost.repository.js";
-<<<<<<< HEAD
 import { connectionDb } from "../database/db.js";
 import urlMetadata from "url-metadata";
-=======
 
 
->>>>>>> main
 
 
 export const getPosts = async (req, res) => {
@@ -67,6 +64,10 @@ export const postPosts = async (req, res) =>{
           return response.rows[0].id;
         }
       }));
+      hashtagsId.map(async (hashtagId) => {
+        await connectionDb.query(`INSERT INTO "hashtagPosts" ("postId", "hashtagId") VALUES ($1, $2);`, [postId, hashtagId]);
+      });
+
         res.sendStatus(201);
   } catch (err){
     res.status(500).send(err.message);
