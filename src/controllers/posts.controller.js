@@ -3,6 +3,7 @@ import { userRepository } from "../repositories/getUser.repository.js";
 import insertNewPostRepository from "../repositories/insertNewPost.repository.js";
 import { connectionDb } from "../database/db.js";
 import urlMetadata from "url-metadata";
+import  getTrandings  from "../repositories/getTrandings.repository.js";
 
 
 
@@ -11,9 +12,8 @@ export const getPosts = async (req, res) => {
   
 
   try{
-    const hashtags = (await connectionDb.query(`SELECT hashtags.name, COUNT("hashtagPosts"."hashtagId") FROM "hashtagPosts"
-    JOIN hashtags ON "hashtagPosts"."hashtagId" = hashtags.id group by hashtags.id
-    `)).rows;
+
+    const hashtags = await getTrandings();
 
   const response = (await connectionDb.query(
     `SELECT users.username, users."pictureUrl", posts.* FROM posts JOIN users ON posts."userId" = users.id 
@@ -37,7 +37,7 @@ export const getPosts = async (req, res) => {
    
   res.status(200).send({hashtags, posts});
   } catch (error) {
-    console.log(error);
+    
     res.status(500).send("An error occurred while trying to fetch the posts, please refresh the page");
   }
 }
@@ -79,25 +79,45 @@ export const postPosts = async (req, res) =>{
 
 export const getTrendingPosts = async (req, res) => {
   const hashtag = (req.params.hashtag).toLowerCase();
+ 
   try{
+    const hashtags = await getTrandings();
   const hashtagId = await connectionDb.query(`SELECT id FROM hashtags WHERE name = $1;`, [hashtag]);
   if(hashtagId.rowCount === 0) return res.status(404).send("Hashtag not found");
-  const response = await connectionDb.query(`SELECT users.username, users."pictureUrl", posts.*FROM posts
+  const response = (await connectionDb.query(`SELECT users.username, users."pictureUrl", posts.*FROM posts
     JOIN users ON posts."userId" = users.id
-   JOIN "hashtagPosts" ON posts.id = "hashtagPosts"."postId" WHERE "hashtagPosts"."hashtagId" = $1;`, [hashtagId.rows[0].id]);
-  if(response.rowCount === 0) return res.status(404).send("There are no posts with this hashtag yet");
-  res.status(200).send(response.rows);
+   JOIN "hashtagPosts" ON posts.id = "hashtagPosts"."postId" WHERE "hashtagPosts"."hashtagId" = $1;`, [hashtagId.rows[0].id])).rows;
+  const posts = await Promise.all(response.map(async (post) => {
+    const { url } = post;
+    const metadata = await urlMetadata(url);
+    const { title, description, image } = metadata;
+    delete post.createdAt;
+    return { ...post, title, description, image };
+  }));
+  res.status(200).send({hashtags, posts});
   } catch (error) {
+    console.log(error);
     res.status(500).send("An error occurred while trying to fetch the posts, please refresh the page");
   }
 };
 
 export const getUserPosts = async (req, res) => {
  const userId = req.params.userId;
+ const hashtags = await getTrandings();
   try{
-  const response = await connectionDb.query(`SELECT users.username, users."pictureUrl", posts.* FROM posts JOIN  users ON posts."userId" = users.id WHERE posts."userId" = $1 ORDER BY posts."createdAt" DESC;`, [userId]);
-  if(response.rowCount === 0) return res.status(404).send("This user has no posts yet");
-  res.status(200).send(response.rows);
+    
+    console.log(hashtags);
+  const response = (await connectionDb.query(`SELECT users.username, users."pictureUrl", posts.* FROM posts JOIN  users ON posts."userId" = users.id WHERE posts."userId" = $1 ORDER BY posts."createdAt" DESC;`, [userId])).rows;
+    
+  const posts = await Promise.all(response.map(async (post) => {
+    const { url } = post;
+    const metadata = await urlMetadata(url);
+    const { title, description, image } = metadata;
+    delete post.createdAt;
+    return { ...post, title, description, image };
+  }));
+
+  res.status(200).send({hashtags, posts});
   } catch (error) {
     res.status(500).send("An error occurred while trying to fetch the posts, please refresh the page");
   }
