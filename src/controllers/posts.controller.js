@@ -35,7 +35,7 @@ export const getPosts = async (req, res) => {
     }));
    
    
-  res.status(200).send({hashtags, response});
+  res.status(200).send({hashtags, posts});
   } catch (error) {
     console.log(error);
     res.status(500).send("An error occurred while trying to fetch the posts, please refresh the page");
