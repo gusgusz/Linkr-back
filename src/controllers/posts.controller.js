@@ -12,32 +12,30 @@ export const getPosts = async (req, res) => {
 
   try{
     const hashtags = (await connectionDb.query(`SELECT hashtags.name, COUNT("hashtagPosts"."hashtagId") FROM "hashtagPosts"
-    JOIN hashtags ON "hashtagPosts"."hashtagId" = hashtags.id 
-    group by hashtags.id
+    JOIN hashtags ON "hashtagPosts"."hashtagId" = hashtags.id group by hashtags.id
     `)).rows;
 
-  const response = await connectionDb.query(
+  const response = (await connectionDb.query(
     `SELECT users.username, users."pictureUrl", posts.* FROM posts JOIN users ON posts."userId" = users.id 
     ORDER BY posts."createdAt" DESC;`
-    );
+    )).rows;
     
     if(response.rowCount === 0) {
       return res.status(404).send("There are no posts yet");
     }
-    const data = response.rows;
-    console.log(data);
+    
   
 
-    const posts = await Promise.all(data.map(async (post) => {
+    const posts = await Promise.all(response.map(async (post) => {
       const { url } = post;
       const metadata = await urlMetadata(url);
       const { title, description, image } = metadata;
       delete post.createdAt;
       return { ...post, title, description, image };
     }));
-    console.log(posts);
    
-  res.status(200).send({hashtags,posts});
+   
+  res.status(200).send({hashtags, response});
   } catch (error) {
     console.log(error);
     res.status(500).send("An error occurred while trying to fetch the posts, please refresh the page");
