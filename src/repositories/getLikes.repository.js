@@ -19,9 +19,19 @@ async function getMessageLikes(postId, userId) {
     
     const arrayOfNames = listOfLikes.rows[0];
     
+    if (arrayOfNames.length !== getCount.rows[0]){
+        message = `Você, ${arrayOfNames[0]} e outras ${arrayOfNames.length-1} pessoas`
+    } else {
+        message = `${arrayOfNames[0]}, ${arrayOfNames[1]} e outras ${arrayOfNames.length-2} pessoas`
+    }
+
     return message
 }
 
 export const likeRepository = {
 	getMessageLikes
 }
+
+/* SELECT users.username, users."pictureUrl", posts.*, count(likes."postId") AS "numberOfLikes" FROM posts JOIN users ON posts."userId" = users.id JOIN likes ON likes."postId" = posts.id GROUP BY users.username, users."pictureUrl", posts.id ORDER BY posts."createdAt" DESC;
+ */
+//INSERT INTO likes ("userId", "postId") VALUES (2, 19)
