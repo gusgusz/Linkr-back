@@ -3,7 +3,7 @@ import likeRepository from "../repositories/getLikes.repository.js";
 export async function create(req, res){
 
     const userId = res.locals.userId;
-    const postId = req.body.cardId;
+    const postId = req.body.postId;
 
     try {
 
@@ -20,13 +20,13 @@ export async function create(req, res){
 export async function deleteLike(req, res){
 
     const userId = res.locals.userId;
-    const postId = req.body.cardId;
+    const postId = req.body.postId;
 
     try {
         
         await likeRepository.deleteLike(postId, userId);
 
-        req.status(200);
+        res.sendStatus(200);
 
     } catch (error) {
 
