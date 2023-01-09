@@ -10,15 +10,14 @@ export const getPosts = async (req, res) => {
   const { authorization } = req.headers;
   const token = authorization.replace('Bearer ', '');
 
-  const userId = await userRepository.getUser(token);
+ 
 
   
 
   try{
-
+    const userId = await userRepository.getUser(token);
     const hashtags = await getTrandings();
-
-  const response = (await connectionDb.query(
+    const response = (await connectionDb.query(
     `SELECT users.username, users."pictureUrl", posts.*, 
     COALESCE(COUNT(likes."postId"),0) AS "numberOfLikes"
      FROM posts 
