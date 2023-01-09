@@ -7,12 +7,12 @@ import { tokenValidation } from "../middlewares/tokenValidations.middleware.js";
 
 const router = Router();
 
-router.get("/timeline", tokenValidation ,getPosts);
+router.get("/timeline", getPosts);
 router.post("/timeline", tokenValidation, postBodyValidation, postPosts);
-router.get("/hashtag/:hashtag", tokenValidation, getTrendingPosts);
+router.get("/hashtag/:hashtag",  getTrendingPosts);
 router.get("/user/:userId", getUserPosts);
 router.put("/timeline", updateUserPost);
-router.get("/likes/:postId", tokenValidation, getLikes);
+router.get("/likes/:postId", getLikes);
 router.get("/usersearch/:username", getUsersBySearch);
 
 export default router;
