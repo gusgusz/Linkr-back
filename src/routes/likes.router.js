@@ -4,7 +4,7 @@ import { tokenValidation } from "../middlewares/tokenValidations.middleware.js";
 
 const router = Router();
 
-router.post("/like", tokenValidation, create);
-router.delete("/dislike", tokenValidation, deleteLike);
+router.post("/like/:id", tokenValidation, create);
+router.delete("/dislike/:id", tokenValidation, deleteLike);
 
 export default router;

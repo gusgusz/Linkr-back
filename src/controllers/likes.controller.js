@@ -4,7 +4,7 @@ import { userRepository } from "../repositories/getUser.repository.js";
 export async function create(req, res){
 
     const userId = res.locals.userId;
-    const postId = req.body.postId;
+    const postId = req.params.id;
 
     try {
 
@@ -21,7 +21,7 @@ export async function create(req, res){
 export async function deleteLike(req, res){
 
     const userId = res.locals.userId;
-    const postId = req.body.postId;
+    const postId = req.params.id;
 
     try {
         

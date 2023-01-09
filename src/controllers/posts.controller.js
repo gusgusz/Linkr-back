@@ -4,7 +4,7 @@ import { connectionDb } from "../database/db.js";
 import urlMetadata from "url-metadata";
 import  getTrandings  from "../repositories/getTrandings.repository.js";
 import updatePostRepository from "../repositories/updatePostRepositories.js";
-import { likeRepository } from "../repositories/getLikes.repository.js";
+import likeRepository from "../repositories/getLikes.repository.js";
 
 export const getPosts = async (req, res) => {
   
