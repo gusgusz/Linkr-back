@@ -7,15 +7,8 @@ import updatePostRepository from "../repositories/updatePostRepositories.js";
 import { likeRepository } from "../repositories/getLikes.repository.js";
 
 export const getPosts = async (req, res) => {
-  const { authorization } = req.headers;
-  const token = authorization.replace('Bearer ', '');
-
  
-
-  
-
   try{
-    const userId = await userRepository.getUser(token);
     const hashtags = await getTrandings();
     const response = (await connectionDb.query(
     `SELECT users.username, users."pictureUrl", posts.*, 
@@ -86,13 +79,8 @@ export const postPosts = async (req, res) =>{
 
 export const getTrendingPosts = async (req, res) => {
   const hashtag = (req.params.hashtag).toLowerCase();
-  const { authorization } = req.headers;
-  const token = authorization.replace('Bearer ', '');
-
-  
  
   try{
-    const userId = await userRepository.getUser(token);
     const hashtags = await getTrandings();
     const hashtagId = await connectionDb.query(`SELECT id FROM hashtags WHERE name = $1;`, [hashtag]);
   if(hashtagId.rowCount === 0) return res.status(404).send("Hashtag not found");
@@ -116,10 +104,7 @@ export const getTrendingPosts = async (req, res) => {
 export const getUserPosts = async (req, res) => {
  const userId = req.params.userId;
  const hashtags = await getTrandings();
- const { authorization } = req.headers;
- const token = authorization.replace('Bearer ', '');
   try{
-    const userId = await userRepository.getUser(token);
     const response = (await connectionDb.query(`SELECT users.username, users."pictureUrl", posts.* FROM posts JOIN  users ON posts."userId" = users.id WHERE posts."userId" = $1 ORDER BY posts."createdAt" DESC;`, [userId])).rows;
     
     const posts = await Promise.all(response.map(async (post) => {
