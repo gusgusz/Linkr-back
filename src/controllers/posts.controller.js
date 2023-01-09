@@ -1,13 +1,10 @@
-
 import { userRepository } from "../repositories/getUser.repository.js";
 import insertNewPostRepository from "../repositories/insertNewPost.repository.js";
 import { connectionDb } from "../database/db.js";
 import urlMetadata from "url-metadata";
 import  getTrandings  from "../repositories/getTrandings.repository.js";
 import updatePostRepository from "../repositories/updatePostRepositories.js";
-
-
-
+import { likeRepository } from "../repositories/getLikes.repository.js";
 
 export const getPosts = async (req, res) => {
   
@@ -17,42 +14,49 @@ export const getPosts = async (req, res) => {
     const hashtags = await getTrandings();
 
   const response = (await connectionDb.query(
-    `SELECT users.username, users."pictureUrl", posts.* FROM posts JOIN users ON posts."userId" = users.id 
-    ORDER BY posts."createdAt" DESC;`
+    `SELECT users.username, users."pictureUrl", posts.*, 
+    COALESCE(COUNT(likes."postId"),0) AS "numberOfLikes"
+     FROM posts 
+     LEFT JOIN users ON posts."userId" = users.id 
+     LEFT JOIN likes ON likes."postId" = posts.id
+     GROUP BY users.username, users."pictureUrl", posts.id 
+     ORDER BY posts."createdAt" DESC;`
+
+  /* `SELECT users.username, users."pictureUrl", posts.* FROM posts JOIN users ON posts."userId" = users.id 
+    ORDER BY posts."createdAt" DESC;`   */
+
     )).rows;
     
     if(response.rowCount === 0) {
       return res.status(404).send("There are no posts yet");
     }
     
-  
-
+ 
     const posts = await Promise.all(response.map(async (post) => {
       const { url } = post;
       const metadata = await urlMetadata(url);
       const { title, description, image } = metadata;
       delete post.createdAt;
-      return { ...post, title, description, image };
+      return { ...post, title, description, image};
     }));
-   
-   
+    
   res.status(200).send({hashtags, posts});
   } catch (error) {
-    
-    res.status(500).send("An error occurred while trying to fetch the posts, please refresh the page");
-  }
+    //res.status(500).send("An error occurred while trying to fetch the posts, please refresh the page");
+    res.send(error.message)
+  } 
 }
 
 export const postPosts = async (req, res) =>{
   try{
     const { authorization } = req.headers;
-        const token = authorization.replace('Bearer ', '');
+    const token = authorization.replace('Bearer ', '');
 
-        const userId = await userRepository.getUser(token);
+    const userId = await userRepository.getUser(token);
 
-        const {url, caption} = req.body;
+    const {url, caption} = req.body;
 
-      const postId =  await insertNewPostRepository(res, url, caption, userId);
+    const postId =  await insertNewPostRepository(res, url, caption, userId);
       
 
       
@@ -174,3 +178,4 @@ export const updateUserPost = async (req, res) =>{
     return res.status(500).send(err.message);
   }
 }
+
