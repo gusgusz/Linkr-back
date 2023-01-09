@@ -4,7 +4,7 @@ import { connectionDb } from "../database/db.js";
 import urlMetadata from "url-metadata";
 import  getTrandings  from "../repositories/getTrandings.repository.js";
 import updatePostRepository from "../repositories/updatePostRepositories.js";
-import likeRepository from "../repositories/getLikes.repository.js";
+
 
 export const getPosts = async (req, res) => {
  
@@ -19,8 +19,6 @@ export const getPosts = async (req, res) => {
      GROUP BY users.username, users."pictureUrl", posts.id 
      ORDER BY posts."createdAt" DESC;`
 
-  /* `SELECT users.username, users."pictureUrl", posts.* FROM posts JOIN users ON posts."userId" = users.id 
-    ORDER BY posts."createdAt" DESC;`   */
 
     )).rows;
     
