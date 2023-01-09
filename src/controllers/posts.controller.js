@@ -33,7 +33,6 @@ export const getPosts = async (req, res) => {
       const { url } = post;
       const metadata = await urlMetadata(url);
       const { title, description, image } = metadata;
-      delete post.createdAt;
       return { ...post, title, description, image};
     }));
     
