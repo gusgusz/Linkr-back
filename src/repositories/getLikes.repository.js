@@ -53,9 +53,25 @@ async function getMessageLikes(postId, userId) {
     return {message}
 }
 
-export const likeRepository = {
-	getMessageLikes
+async function createLike(postId, userId){
+
+    return await connectionDb.query(`INSERT INTO likes ("userId", "postId") VALUES ($1, $2);`, [userId, postId]);
+
 }
+
+async function deleteLike(postId, userId){
+
+    return await connectionDb.query(`DELETE FROM likes WHERE "userId"=$1 AND "postId"=$2;`, [userId, postId]);
+
+}
+
+const likeRepository = {
+    createLike,
+    deleteLike,
+    getMessageLikes
+};
+
+export default likeRepository;
 
 /* SELECT users.username, users."pictureUrl", posts.*, COALESCE(COUNT("userId")) AS "numberOfLikes" FROM posts JOIN users ON posts."userId" = users.id JOIN likes ON likes."postId" = posts.id GROUP BY users.username, users."pictureUrl", posts.id ORDER BY posts."createdAt" DESC;
  */

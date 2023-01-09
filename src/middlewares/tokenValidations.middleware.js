@@ -30,7 +30,9 @@ export async function tokenValidation(req, res, next) {
       return res
         .status(401)
         .send({ message: "Essa sessão não existe!" });
-    }
+  }
 
-  next()
+  res.locals.userId = sessionExists.rows[0].userId;
+
+  next();
 }
