@@ -17,7 +17,7 @@ export const getPosts = async (req, res) => {
      LEFT JOIN users ON posts."userId" = users.id 
      LEFT JOIN likes ON likes."postId" = posts.id
      GROUP BY users.username, users."pictureUrl", posts.id 
-     ORDER BY posts."createdAt" DESC;`
+     ORDER BY posts."createdAt" DESC LIMIT 10;`
 
 
     )).rows;
