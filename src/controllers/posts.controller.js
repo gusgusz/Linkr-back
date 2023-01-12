@@ -8,13 +8,15 @@ import {checkFollowRepository, checkStatusFollow} from "../repositories/checkFol
 import { getPostsUser } from "../repositories/getPosts.js";
 
 export const getPosts = async (req, res) => {
-
+  let {page} = req.query;
+  if(!page) page=0;
+  
   const userId = res.locals.userId;
   try{
     const hashtags = await getTrandings();
     const followStatus = await checkStatusFollow(res, userId)
 
-    const response = await getPostsUser(res,userId,followStatus);
+    const response = await getPostsUser(res,userId,followStatus, page);
     
     if(response.rowCount === 0) {
       return res.status(404).send("There are no posts yet");
