@@ -4,23 +4,18 @@ import { connectionDb } from "../database/db.js";
 import urlMetadata from "url-metadata";
 import  getTrandings  from "../repositories/getTrandings.repository.js";
 import updatePostRepository from "../repositories/updatePostRepositories.js";
-
+import {checkFollowRepository, checkStatusFollow} from "../repositories/checkFolow.repositories.js";
+import { getPostsUser } from "../repositories/getPosts.js";
 
 export const getPosts = async (req, res) => {
- 
+  const userId = res.locals.userId;
   try{
     const hashtags = await getTrandings();
-    const response = (await connectionDb.query(
-    `SELECT users.username, users."pictureUrl", posts.*, 
-    COALESCE(COUNT(likes."postId"),0) AS "numberOfLikes"
-     FROM posts 
-     LEFT JOIN users ON posts."userId" = users.id 
-     LEFT JOIN likes ON likes."postId" = posts.id
-     GROUP BY users.username, users."pictureUrl", posts.id 
-     ORDER BY posts."createdAt" DESC LIMIT 10;`
+    const followStatus = await checkStatusFollow(res, userId)
 
-
-    )).rows;
+    const response = await getPostsUser(res,userId,followStatus);
+    
+      
     
     if(response.rowCount === 0) {
       return res.status(404).send("There are no posts yet");
@@ -34,7 +29,7 @@ export const getPosts = async (req, res) => {
       return { ...post, title, description, image};
     }));
     
-  res.status(200).send({hashtags, posts});
+  res.status(200).send({hashtags, posts, followStatus});
   } catch (error) {
     //res.status(500).send("An error occurred while trying to fetch the posts, please refresh the page");
     res.send(error.message)
@@ -104,11 +99,15 @@ export const getTrendingPosts = async (req, res) => {
 };
 
 export const getUserPosts = async (req, res) => {
- const userId = req.params.userId;
+  const userId = req.params.userId;
+  const userLog = res.locals.userId ;
+ 
  const hashtags = await getTrandings();
   try{
+
     const response = (await connectionDb.query(`SELECT users.username, users."pictureUrl", posts.* FROM posts JOIN  users ON posts."userId" = users.id WHERE posts."userId" = $1 ORDER BY posts."createdAt" DESC;`, [userId])).rows;
-    
+    const userFollow = await checkFollowRepository(res, userId, userLog);
+
     const posts = await Promise.all(response.map(async (post) => {
     const { url } = post;
     const metadata = await urlMetadata(url);
@@ -116,8 +115,8 @@ export const getUserPosts = async (req, res) => {
     delete post.createdAt;
     return { ...post, title, description, image };
   }));
-
-  res.status(200).send({hashtags, posts});
+  console.log({hashtags, posts,userFollow})
+  res.status(200).send({hashtags, posts,userFollow});
   } catch (error) {
     res.status(500).send("An error occurred while trying to fetch the posts, please refresh the page");
   }
