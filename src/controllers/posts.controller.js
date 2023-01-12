@@ -8,16 +8,13 @@ import {checkFollowRepository, checkStatusFollow} from "../repositories/checkFol
 import { getPostsUser } from "../repositories/getPosts.js";
 
 export const getPosts = async (req, res) => {
+
   const userId = res.locals.userId;
   try{
     const hashtags = await getTrandings();
     const followStatus = await checkStatusFollow(res, userId)
 
     const response = await getPostsUser(res,userId,followStatus);
-    
-     
- 
-  const userId = res.locals.userId;
     
     if(response.rowCount === 0) {
       return res.status(404).send("There are no posts yet");
@@ -32,7 +29,7 @@ export const getPosts = async (req, res) => {
     
   res.status(200).send({hashtags, posts, followStatus});
   } catch (error) {
-    //res.status(500).send("An error occurred while trying to fetch the posts, please refresh the page");
+    
     res.send(error.message)
   } 
 }
@@ -85,6 +82,7 @@ export const getTrendingPosts = async (req, res) => {
     const response = (await connectionDb.query(`SELECT users.username, users."pictureUrl", posts.* FROM posts
     JOIN users ON posts."userId" = users.id
     JOIN "hashtagPosts" ON posts.id = "hashtagPosts"."postId" WHERE "hashtagPosts"."hashtagId" = $1;`, [hashtagId.rows[0].id])).rows;
+
     const posts = await Promise.all(response.map(async (post) => {
     const { url } = post;
     const metadata = await urlMetadata(url);
