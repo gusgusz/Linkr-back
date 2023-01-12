@@ -7,22 +7,30 @@ import updatePostRepository from "../repositories/updatePostRepositories.js";
 
 
 export const getPosts = async (req, res) => {
+  let {page} = req.query;
+  if(!page) page = 0;
  
+ 
+
   const userId = res.locals.userId;
+
 
   try{
     const hashtags = await getTrandings();
-    const response = (await connectionDb.query(
-    `SELECT users.username, users."pictureUrl", posts.*, 
-    COALESCE(COUNT(likes."postId"),0) AS "numberOfLikes",
-    (select count (*) from likes where "postId"=posts.id and "userId"=$1)::int as liked
-     FROM posts 
-     LEFT JOIN users ON posts."userId" = users.id 
-     LEFT JOIN likes ON likes."postId" = posts.id
-     GROUP BY users.username, users."pictureUrl", posts.id 
-     ORDER BY posts."createdAt" DESC LIMIT 10;`,
-      [userId]
-    )).rows;
+   
+      const response = (await connectionDb.query(
+        `SELECT users.username, users."pictureUrl", posts.*, 
+        COALESCE(COUNT(likes."postId"),0) AS "numberOfLikes",
+        (select count (*) from likes where "postId"=posts.id and "userId"=$1)::int as liked
+         FROM posts 
+         LEFT JOIN users ON posts."userId" = users.id 
+         LEFT JOIN likes ON likes."postId" = posts.id
+         GROUP BY users.username, users."pictureUrl", posts.id 
+         ORDER BY posts."createdAt" DESC OFFSET $2 LIMIT 10;`,
+          [userId, (page*10)]
+        )).rows;
+    
+   
     
     if(response.rowCount === 0) {
       return res.status(404).send("There are no posts yet");
@@ -39,6 +47,7 @@ export const getPosts = async (req, res) => {
   } catch (error) {
     //res.status(500).send("An error occurred while trying to fetch the posts, please refresh the page");
     res.send(error.message)
+    console.log(error.position)
   } 
 }
 
@@ -90,6 +99,7 @@ export const getTrendingPosts = async (req, res) => {
     const response = (await connectionDb.query(`SELECT users.username, users."pictureUrl", posts.* FROM posts
     JOIN users ON posts."userId" = users.id
     JOIN "hashtagPosts" ON posts.id = "hashtagPosts"."postId" WHERE "hashtagPosts"."hashtagId" = $1;`, [hashtagId.rows[0].id])).rows;
+
     const posts = await Promise.all(response.map(async (post) => {
     const { url } = post;
     const metadata = await urlMetadata(url);
