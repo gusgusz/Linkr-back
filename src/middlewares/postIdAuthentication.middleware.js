@@ -1,4 +1,3 @@
-import { connectionDb } from "../database/db.js";
 import findPostIdRepositorie from "../repositories/findPostId.repositorie.js";
 
 export default async function postIdAuthenticationMiddleware(req,res,next) {
