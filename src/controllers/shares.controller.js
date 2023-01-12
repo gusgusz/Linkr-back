@@ -1,44 +1,96 @@
 import { connectionDb } from "../database/db.js";
+import { userRepository } from "../repositories/getUser.repository.js";
+import insertNewShareRepository from "../repositories/insertNewShare.repository.js";
 
 
 export const postShare = async (req, res) => {
-  
 
     try{
-  
-      const hashtags = await getTrandings();
-  
+
+    const { authorization } = req.headers;
+    const token = authorization.replace('Bearer ', '');
+      
+    const userId = await userRepository.getUser(token);
+    
+    const postId = req.params.postId
+
+    const response = await insertNewShareRepository(res, postId, userId)
+/* 
     const response = (await connectionDb.query(
       `SELECT users.username, users."pictureUrl", posts.*,
        COALESCE(COUNT(likes."postId"),0) AS "numberOfLikes",
-       COALESCE(COUNT(shares."postId"),0) AS "numberOfShares"
+       COALESCE(COUNT(shares."postId"),0) AS "numberOfShares",
+       COALESCE(COUNT(comments."postId"),0) AS "numberOfComments"
        FROM posts 
        LEFT JOIN users ON posts."userId" = users.id 
        LEFT JOIN likes ON likes."postId" = posts.id
        LEFT JOIN shares ON shares."postId" = posts.id
-       WHERE posts.id = 1
+       LEFT JOIN comments ON comments."postId" = posts.id
        GROUP BY users.username, users."pictureUrl", posts.id 
        ;`
   
-  
-      )).rows;
-      
-      if(response.rowCount === 0) {
-        return res.status(404).send("There are no posts yet");
-      }
-      
-   
-      const posts = await Promise.all(response.map(async (post) => {
-        const { url } = post;
-        const metadata = await urlMetadata(url);
-        const { title, description, image } = metadata;
-        delete post.createdAt;
-        return { ...post, title, description, image};
-      }));
-      
-    res.status(200).send({hashtags, posts});
+      )).rows; */
+
+      res.sendStatus(201);
     } catch (error) {
-      //res.status(500).send("An error occurred while trying to fetch the posts, please refresh the page");
       res.send(error.message)
     } 
   }
+
+export const getShares = async (req, res) => {
+  try{
+
+  /*   const response = (await connectionDb.query(
+      `SELECT "userOriginal".username, "userOriginal"."pictureUrl", posts.*,
+      COALESCE("userShare".username, 'notShared') AS "repostUsername",
+      COALESCE(COUNT(likes."postId"),0) AS "numberOfLikes",
+      COALESCE(COUNT(shares."postId"),0) AS "numberOfShares",
+      COALESCE(COUNT(comments."postId"),0) AS "numberOfComments"
+       FROM posts 
+       LEFT JOIN users "userOriginal" ON posts."userId" = "userOriginal".id
+       LEFT JOIN shares ON shares."postId" = posts.id
+       LEFT JOIN users "userShare" ON shares."userId" = "userShare".id
+       LEFT JOIN likes ON likes."postId" = posts.id
+       LEFT JOIN comments ON comments."postId" = posts.id
+       GROUP BY "userOriginal".username, "userOriginal"."pictureUrl", posts.id, "userShare".username;
+       ;` */
+
+       const response = (await connectionDb.query(
+        `SELECT posts.*,
+         "userShare".username AS "repostUsername",
+         COALESCE(COUNT(shares."postId"),0) AS "numberOfShares"
+         FROM posts 
+         JOIN shares ON shares."postId" = posts.id
+         LEFT JOIN users "userShare" ON shares."userId" = "userShare".id
+         GROUP BY posts.id, "userShare".username;
+         `
+        
+
+
+         /* `SELECT "userOriginal".username, "userOriginal"."pictureUrl", posts.*,
+         "userShare".username AS "repostUsername",
+         COALESCE(COUNT(likes."postId"),0) AS "numberOfLikes",
+         COALESCE(COUNT(shares."postId"),0) AS "numberOfShares",
+         COALESCE(COUNT(comments."postId"),0) AS "numberOfComments"
+         FROM posts 
+         LEFT JOIN users "userOriginal" ON posts."userId" = "userOriginal".id
+         JOIN shares ON shares."postId" = posts.id
+         LEFT JOIN users "userShare" ON shares."userId" = "userShare".id
+         LEFT JOIN likes ON likes."postId" = posts.id
+         LEFT JOIN comments ON comments."postId" = posts.id
+         GROUP BY "userOriginal".username, "userOriginal"."pictureUrl", posts.id, "userShare".username;
+         ` */
+      )).rows;
+      
+
+
+      res.status(200).send(response);
+      //res.status(200).send("Repost success!");
+    } catch (error) {
+      res.send(error.message)
+    } 
+}
+
+
+
+       
