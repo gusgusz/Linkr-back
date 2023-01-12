@@ -65,10 +65,16 @@ async function deleteLike(postId, userId){
 
 }
 
+async function getQuantityLikes(postId){
+
+    return await connectionDb.query(`SELECT COUNT(likes."postId") as "numberOfLikes" FROM likes WHERE "postId"=$1 GROUP BY "postId";`, [postId]);
+}
+
 const likeRepository = {
     createLike,
     deleteLike,
-    getMessageLikes
+    getMessageLikes,
+    getQuantityLikes
 };
 
 export default likeRepository;

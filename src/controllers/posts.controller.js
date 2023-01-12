@@ -15,13 +15,14 @@ export const getPosts = async (req, res) => {
 
     const response = await getPostsUser(res,userId,followStatus);
     
-      
+     
+ 
+  const userId = res.locals.userId;
     
     if(response.rowCount === 0) {
       return res.status(404).send("There are no posts yet");
     }
     
- 
     const posts = await Promise.all(response.map(async (post) => {
       const { url } = post;
       const metadata = await urlMetadata(url);
