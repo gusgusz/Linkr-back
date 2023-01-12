@@ -10,7 +10,11 @@ export async function create(req, res){
 
         await likeRepository.createLike(postId, userId);
 
-        res.sendStatus(201);
+        const { rows } = await likeRepository.getQuantityLikes(postId);
+
+        const numberOfLikes = rows.length? rows[0].numberOfLikes: 0;
+
+        res.status(201).send({numberOfLikes: numberOfLikes});
         
     } catch (error) {
         
@@ -27,7 +31,11 @@ export async function deleteLike(req, res){
         
         await likeRepository.deleteLike(postId, userId);
 
-        res.sendStatus(200);
+        const { rows } = await likeRepository.getQuantityLikes(postId);
+
+        const numberOfLikes = rows.length? rows[0].numberOfLikes: 0;
+        
+        res.status(201).send({numberOfLikes: numberOfLikes});
 
     } catch (error) {
 

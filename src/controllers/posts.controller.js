@@ -8,25 +8,26 @@ import updatePostRepository from "../repositories/updatePostRepositories.js";
 
 export const getPosts = async (req, res) => {
  
+  const userId = res.locals.userId;
+
   try{
     const hashtags = await getTrandings();
     const response = (await connectionDb.query(
     `SELECT users.username, users."pictureUrl", posts.*, 
-    COALESCE(COUNT(likes."postId"),0) AS "numberOfLikes"
+    COALESCE(COUNT(likes."postId"),0) AS "numberOfLikes",
+    (select count (*) from likes where "postId"=posts.id and "userId"=$1)::int as liked
      FROM posts 
      LEFT JOIN users ON posts."userId" = users.id 
      LEFT JOIN likes ON likes."postId" = posts.id
      GROUP BY users.username, users."pictureUrl", posts.id 
-     ORDER BY posts."createdAt" DESC LIMIT 10;`
-
-
+     ORDER BY posts."createdAt" DESC LIMIT 10;`,
+      [userId]
     )).rows;
     
     if(response.rowCount === 0) {
       return res.status(404).send("There are no posts yet");
     }
     
- 
     const posts = await Promise.all(response.map(async (post) => {
       const { url } = post;
       const metadata = await urlMetadata(url);
