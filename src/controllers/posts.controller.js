@@ -8,13 +8,17 @@ import {checkFollowRepository, checkStatusFollow} from "../repositories/checkFol
 import { getPostsUser } from "../repositories/getPosts.js";
 
 export const getPosts = async (req, res) => {
+  let {page} = req.query;
+  if(!page) page = 0;
+  page = page * 10;
+  console.log(page);
 
   const userId = res.locals.userId;
   try{
     const hashtags = await getTrandings();
     const followStatus = await checkStatusFollow(res, userId)
 
-    const response = await getPostsUser(res,userId,followStatus);
+    const response = await getPostsUser(res,userId, page, followStatus);
     
     if(response.rowCount === 0) {
       return res.status(404).send("There are no posts yet");
@@ -29,8 +33,8 @@ export const getPosts = async (req, res) => {
     
   res.status(200).send({hashtags, posts, followStatus});
   } catch (error) {
-    
-    res.send(error.message)
+    console.log(error)
+    res.sendStatus(500)
   } 
 }
 
@@ -84,7 +88,7 @@ export const getTrendingPosts = async (req, res) => {
   if(hashtagId.rowCount === 0) return res.status(404).send("Hashtag not found");
     const response = (await connectionDb.query(`SELECT users.username, users."pictureUrl", posts.* FROM posts
     JOIN users ON posts."userId" = users.id
-    JOIN "hashtagPosts" ON posts.id = "hashtagPosts"."postId" WHERE "hashtagPosts"."hashtagId" = $1  OFFSET $2 LIMIT 10;`, [hashtagId.rows[0].id, page*10])).rows;
+    JOIN "hashtagPosts" ON posts.id = "hashtagPosts"."postId" WHERE "hashtagPosts"."hashtagId" = $1 ORDER BY posts."createdAt" DESC  OFFSET $2 LIMIT 10;`, [hashtagId.rows[0].id, page*10])).rows;
 
     const posts = await Promise.all(response.map(async (post) => {
     const { url } = post;
@@ -109,7 +113,7 @@ export const getUserPosts = async (req, res) => {
   if(!page) page = 0;
  
   try{
-    const response = (await connectionDb.query(`SELECT users.username, users."pictureUrl", posts.* FROM posts JOIN  users ON posts."userId" = users.id WHERE posts."userId" = $1 ORDER BY posts."createdAt"  OFFSET $2 LIMIT 10;`, [userId, page*10])).rows;
+    const response = (await connectionDb.query(`SELECT users.username, users."pictureUrl", posts.* FROM posts JOIN  users ON posts."userId" = users.id WHERE posts."userId" = $1 ORDER BY posts."createdAt" DESC OFFSET $2 LIMIT 10;`, [userId, page*10])).rows;
     
 
    
