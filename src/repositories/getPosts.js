@@ -9,8 +9,8 @@ export const getPostsUser= async(res, userId, page, followStatus)=>{
             
             response = (await connectionDb.query(
                 `SELECT users.username, users."pictureUrl", posts.*, 
-                COALESCE(COUNT(likes."postId"),0) AS "numberOfLikes",
-                COALESCE(COUNT(shares."postId"),0) AS "numberOfShares"
+                COALESCE(COUNT(shares."postId"),0) AS "numberOfShares",
+                (select count (*) from likes where "postId"=posts.id and "userId"=$1)::int as liked
                  FROM posts 
                  LEFT JOIN users ON posts."userId" = users.id
                  LEFT JOIN likes ON likes."postId" = posts.id
@@ -20,9 +20,9 @@ export const getPostsUser= async(res, userId, page, followStatus)=>{
                  ORDER BY posts."createdAt" DESC OFFSET $2 LIMIT 10;`,[userId, page])).rows;
         } else{
             response = (await connectionDb.query(
-                `SELECT users.username, users."pictureUrl", posts.*, 
-                COALESCE(COUNT(likes."postId"),0) AS "numberOfLikes",
-                COALESCE(COUNT(shares."postId"),0) AS "numberOfShares"
+                `SELECT users.username, users."pictureUrl", posts.*,
+                COALESCE(COUNT(shares."postId"),0) AS "numberOfShares",
+                (select count (*) from likes where "postId"=posts.id and "userId"=$1)::int as liked
                  FROM posts 
                  LEFT JOIN users ON posts."userId" = users.id
                  LEFT JOIN shares ON shares."postId" = posts.id
