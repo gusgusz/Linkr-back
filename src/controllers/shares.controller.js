@@ -30,7 +30,7 @@ export const postShare = async (req, res) => {
 export const getAllShares = async (req, res) =>{
   try{
     const repostsUsernames = await getSharesArray()
-    const userId = 9;
+    const userId = res.locals.userId;
     const followStatus = await checkStatusFollow(res, userId)
 
 
