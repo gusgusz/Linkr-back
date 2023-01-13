@@ -3,6 +3,7 @@ import { tokenSchema } from "../models/token.model.js";
 
 export async function tokenValidation(req, res, next) {
   const { authorization } = req.headers;
+  
   if (!authorization){
     return res
         .status(401)

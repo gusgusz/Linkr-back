@@ -8,11 +8,11 @@ import {checkFollowRepository, checkStatusFollow} from "../repositories/checkFol
 import { getPostsUser } from "../repositories/getPosts.js";
 
 export const getPosts = async (req, res) => {
+
   let {page} = req.query;
   if(!page) page = 0;
   page = page * 10;
   console.log(page);
-
   const userId = res.locals.userId;
   try{
     const hashtags = await getTrandings();
@@ -106,7 +106,6 @@ export const getTrendingPosts = async (req, res) => {
 
 export const getUserPosts = async (req, res) => {
   const userId = req.params.userId;
-  const userLog = res.locals.userId ;
  
  const hashtags = await getTrandings();
   let {page} = req.query;
@@ -115,10 +114,6 @@ export const getUserPosts = async (req, res) => {
   try{
     const response = (await connectionDb.query(`SELECT users.username, users."pictureUrl", posts.* FROM posts JOIN  users ON posts."userId" = users.id WHERE posts."userId" = $1 ORDER BY posts."createdAt" DESC OFFSET $2 LIMIT 10;`, [userId, page*10])).rows;
     
-
-   
-    const userFollow = await checkFollowRepository(res, userId, userLog);
-
     const posts = await Promise.all(response.map(async (post) => {
     const { url } = post;
     const metadata = await urlMetadata(url);
@@ -126,8 +121,8 @@ export const getUserPosts = async (req, res) => {
     delete post.createdAt;
     return { ...post, title, description, image };
   }));
-  console.log({hashtags, posts,userFollow})
-  res.status(200).send({hashtags, posts,userFollow});
+  
+  res.status(200).send({hashtags, posts});
   } catch (error) {
     res.status(500).send("An error occurred while trying to fetch the posts, please refresh the page");
   }

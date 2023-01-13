@@ -1,5 +1,6 @@
 import { connectionDb} from "../database/db.js";
 
+
 export const getPostsUser= async(res, userId, page, followStatus)=>{
     try{
         const statusFollow = followStatus;
@@ -18,8 +19,10 @@ export const getPostsUser= async(res, userId, page, followStatus)=>{
                  LEFT JOIN shares ON shares."postId" = posts.id
                  JOIN follows ON follows."userId"=$1 WHERE (follows."userId"=$1 AND follows."followId"=users.id) OR users.id=$1
                  GROUP BY users.username, users."pictureUrl", posts.id 
-                 ORDER BY posts."createdAt" DESC OFFSET $2 LIMIT 10;`,[userId, page])).rows;
+                 ORDER BY posts."createdAt" DESC OFFSET $2 LIMIT 10;`,[userId,(page*10)])).rows;
+
         } else{
+            
             response = (await connectionDb.query(
                 `SELECT users.username, users."pictureUrl", posts.*,
                 COALESCE(COUNT(shares."postId"),0) AS "numberOfShares",
@@ -30,7 +33,9 @@ export const getPostsUser= async(res, userId, page, followStatus)=>{
                  LEFT JOIN shares ON shares."postId" = posts.id
                  LEFT JOIN likes ON likes."postId" = posts.id WHERE users.id=$1
                  GROUP BY users.username, users."pictureUrl", posts.id 
-                 ORDER BY posts."createdAt" DESC OFFSET $2 LIMIT 10;`,[userId, page])).rows;
+                 ORDER BY posts."createdAt" DESC  OFFSET $2 LIMIT 10;`,
+                 [userId, (page*10)])).rows;
+
         }
 
         return response;
