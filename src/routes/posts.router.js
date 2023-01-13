@@ -20,6 +20,6 @@ router.delete("/user/:userId",tokenValidation, deleteFollow);
 router.put("/timeline", updateUserPost);
 router.get("/likes/:postId", getLikes);
 router.get("/usersearch/:username", getUsersBySearch);
-router.post("/repost/:postId", tokenValidation, postShare);
+router.post("/repost/:postId", postShare);
 router.get("/reposts", tokenValidation, getAllShares)
 export default router;

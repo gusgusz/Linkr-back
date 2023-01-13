@@ -17,7 +17,7 @@ export const postShare = async (req, res) => {
     
     const postId = req.params.postId;
 
-    await insertNewShareRepository(res, postId, userId);
+    await insertNewShareRepository(postId, userId);
 
       res.sendStatus(201);
     } catch (error) {
@@ -30,7 +30,7 @@ export const postShare = async (req, res) => {
 export const getAllShares = async (req, res) =>{
   try{
     const repostsUsernames = await getSharesArray()
-    const userId = 4;
+    const userId = 9;
     const followStatus = await checkStatusFollow(res, userId)
 
 

@@ -31,7 +31,7 @@ export const getPosts = async (req, res) => {
       return { ...post, title, description, image, isRepost: false};
     }));
    
-    res.status(200).send({hashtags, posts: allPosts, followStatus, repostsUsernames});
+    res.status(200).send({hashtags, posts, followStatus});
   } catch (err) {
     
     res.status(500).send(err.message);
