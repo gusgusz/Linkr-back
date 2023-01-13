@@ -6,6 +6,7 @@ import  getTrandings  from "../repositories/getTrandings.repository.js";
 import updatePostRepository from "../repositories/updatePostRepositories.js";
 import {checkFollowRepository, checkStatusFollow} from "../repositories/checkFolow.repositories.js";
 import { getPostsUser } from "../repositories/getPosts.js";
+import { getSharesByPostId } from "../repositories/getShares.repository.js";
 
 export const getPosts = async (req, res) => {
   let {page} = req.query;
@@ -28,7 +29,7 @@ export const getPosts = async (req, res) => {
       const { url } = post;
       const metadata = await urlMetadata(url);
       const { title, description, image } = metadata;
-      return { ...post, title, description, image};
+      return { ...post, title, description, image, isRepost: false};
     }));
     
   res.status(200).send({hashtags, posts, followStatus});

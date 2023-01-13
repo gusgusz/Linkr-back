@@ -15,21 +15,6 @@ export const postShare = async (req, res) => {
     const postId = req.params.postId
 
     const response = await insertNewShareRepository(res, postId, userId)
-/* 
-    const response = (await connectionDb.query(
-      `SELECT users.username, users."pictureUrl", posts.*,
-       COALESCE(COUNT(likes."postId"),0) AS "numberOfLikes",
-       COALESCE(COUNT(shares."postId"),0) AS "numberOfShares",
-       COALESCE(COUNT(comments."postId"),0) AS "numberOfComments"
-       FROM posts 
-       LEFT JOIN users ON posts."userId" = users.id 
-       LEFT JOIN likes ON likes."postId" = posts.id
-       LEFT JOIN shares ON shares."postId" = posts.id
-       LEFT JOIN comments ON comments."postId" = posts.id
-       GROUP BY users.username, users."pictureUrl", posts.id 
-       ;`
-  
-      )).rows; */
 
       res.sendStatus(201);
     } catch (error) {
@@ -38,6 +23,7 @@ export const postShare = async (req, res) => {
   }
 
 export const getShares = async (req, res) => {
+
   try{
 
   /*   const response = (await connectionDb.query(
@@ -54,32 +40,22 @@ export const getShares = async (req, res) => {
        LEFT JOIN comments ON comments."postId" = posts.id
        GROUP BY "userOriginal".username, "userOriginal"."pictureUrl", posts.id, "userShare".username;
        ;` */
+      const response = (await connectionDb.query(
+      `SELECT users.username AS "repostUsername", posts.id AS "postId"
+       FROM posts 
+       JOIN shares ON shares."postId" = posts.id
+       JOIN users ON shares."userId" = users.id;
+       ` 
+       /* const response = (await connectionDb.query(
 
-       const response = (await connectionDb.query(
-        `SELECT posts.*,
-         "userShare".username AS "repostUsername",
-         COALESCE(COUNT(shares."postId"),0) AS "numberOfShares"
-         FROM posts 
-         JOIN shares ON shares."postId" = posts.id
-         LEFT JOIN users "userShare" ON shares."userId" = "userShare".id
-         GROUP BY posts.id, "userShare".username;
-         `
-        
-
-
-         /* `SELECT "userOriginal".username, "userOriginal"."pictureUrl", posts.*,
-         "userShare".username AS "repostUsername",
-         COALESCE(COUNT(likes."postId"),0) AS "numberOfLikes",
-         COALESCE(COUNT(shares."postId"),0) AS "numberOfShares",
-         COALESCE(COUNT(comments."postId"),0) AS "numberOfComments"
-         FROM posts 
-         LEFT JOIN users "userOriginal" ON posts."userId" = "userOriginal".id
-         JOIN shares ON shares."postId" = posts.id
-         LEFT JOIN users "userShare" ON shares."userId" = "userShare".id
-         LEFT JOIN likes ON likes."postId" = posts.id
-         LEFT JOIN comments ON comments."postId" = posts.id
-         GROUP BY "userOriginal".username, "userOriginal"."pictureUrl", posts.id, "userShare".username;
-         ` */
+         `SELECT
+             COALESCE(COUNT(shares."postId"),0) AS "numberOfShares"
+             FROM posts 
+             LEFT JOIN shares ON shares."postId" = posts.id
+             WHERE posts.id = $1
+             GROUP BY posts.id;
+             `, [postId] */
+    
       )).rows;
       
 
