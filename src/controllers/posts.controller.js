@@ -28,13 +28,13 @@ export const getPosts = async (req, res) => {
       const { url } = post;
       const metadata = await urlMetadata(url);
       const { title, description, image } = metadata;
-      return { ...post, title, description, image};
+      return { ...post, title, description, image, isRepost: false};
     }));
+   
+    res.status(200).send({hashtags, posts, followStatus});
+  } catch (err) {
     
-  res.status(200).send({hashtags, posts, followStatus});
-  } catch (error) {
-    console.log(error)
-    res.sendStatus(500)
+    res.status(500).send(err.message);
   } 
 }
 
