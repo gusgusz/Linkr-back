@@ -9,7 +9,8 @@ export const getPostsUser= async(res, userId, page, followStatus)=>{
             
             response = (await connectionDb.query(
                 `SELECT users.username, users."pictureUrl", posts.*, 
-                COALESCE(COUNT(likes."postId"),0) AS "numberOfLikes"
+                COALESCE(COUNT(likes."postId"),0) AS "numberOfLikes",
+                (select count (*) from likes where "postId"=posts.id and "userId"=$1)::int as liked
                  FROM posts 
                  LEFT JOIN users ON posts."userId" = users.id
                  LEFT JOIN likes ON likes."postId" = posts.id
@@ -19,7 +20,8 @@ export const getPostsUser= async(res, userId, page, followStatus)=>{
         } else{
             response = (await connectionDb.query(
                 `SELECT users.username, users."pictureUrl", posts.*, 
-                COALESCE(COUNT(likes."postId"),0) AS "numberOfLikes"
+                COALESCE(COUNT(likes."postId"),0) AS "numberOfLikes",
+                (select count (*) from likes where "postId"=posts.id and "userId"=$1)::int as liked
                  FROM posts 
                  LEFT JOIN users ON posts."userId" = users.id
                  LEFT JOIN likes ON likes."postId" = posts.id WHERE users.id=$1
