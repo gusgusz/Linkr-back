@@ -5,7 +5,7 @@ import { getUsersBySearch } from "../controllers/users.controller.js";
 import { postBodyValidation } from "../middlewares/postsBodyValidation.middleware.js";
 import { tokenValidation } from "../middlewares/tokenValidations.middleware.js";
 import { postFollow,deleteFollow } from "../controllers/follows.controller.js";
-import { getShares, postShare } from "../controllers/shares.controller.js";
+import { getAllShares, postShare } from "../controllers/shares.controller.js";
 
 const router = Router();
 
@@ -21,6 +21,5 @@ router.put("/timeline", updateUserPost);
 router.get("/likes/:postId", getLikes);
 router.get("/usersearch/:username", getUsersBySearch);
 router.post("/repost/:postId", tokenValidation, postShare);
-router.get("/reposts", tokenValidation, getShares);
-
+router.get("/reposts", tokenValidation, getAllShares)
 export default router;
