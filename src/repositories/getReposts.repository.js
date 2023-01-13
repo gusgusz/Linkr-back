@@ -1,7 +1,6 @@
 import { connectionDb} from "../database/db.js";
 
-
-export const getPostsUser= async(res, userId, page, followStatus)=>{
+export const getRepostsUser= async(res, userId, followStatus)=>{
     try{
         const statusFollow = followStatus;
         let response;
@@ -10,32 +9,26 @@ export const getPostsUser= async(res, userId, page, followStatus)=>{
             
             response = (await connectionDb.query(
                 `SELECT users.username, users."pictureUrl", posts.*, 
-                COALESCE(COUNT(shares."postId"),0) AS "numberOfShares",
                 COALESCE(COUNT(likes."postId"),0) AS "numberOfLikes",
-                (select count (*) from likes where "postId"=posts.id and "userId"=$1)::int as liked
+                COALESCE(COUNT(shares."postId"),0) AS "numberOfShares"
                  FROM posts 
                  LEFT JOIN users ON posts."userId" = users.id
                  LEFT JOIN likes ON likes."postId" = posts.id
-                 LEFT JOIN shares ON shares."postId" = posts.id
-                 JOIN follows ON follows."userId"=$1 WHERE (follows."userId"=$1 AND follows."followId"=users.id) OR users.id=$1
+                 JOIN shares ON shares."postId" = posts.id
+                 JOIN follows ON follows."userId"=$1 WHERE ((follows."userId"=$1 AND follows."followId"=users.id) OR users.id=$1)
                  GROUP BY users.username, users."pictureUrl", posts.id 
-                 ORDER BY posts."createdAt" DESC OFFSET $2 LIMIT 10;`,[userId,(page*10)])).rows;
-
+                 ;`,[userId])).rows;
         } else{
-            
             response = (await connectionDb.query(
-                `SELECT users.username, users."pictureUrl", posts.*,
-                COALESCE(COUNT(shares."postId"),0) AS "numberOfShares",
+                `SELECT users.username, users."pictureUrl", posts.*, 
                 COALESCE(COUNT(likes."postId"),0) AS "numberOfLikes",
-                (select count (*) from likes where "postId"=posts.id and "userId"=$1)::int as liked
+                COALESCE(COUNT(shares."postId"),0) AS "numberOfShares"
                  FROM posts 
                  LEFT JOIN users ON posts."userId" = users.id
-                 LEFT JOIN shares ON shares."postId" = posts.id
+                 JOIN shares ON shares."postId" = posts.id
                  LEFT JOIN likes ON likes."postId" = posts.id WHERE users.id=$1
                  GROUP BY users.username, users."pictureUrl", posts.id 
-                 ORDER BY posts."createdAt" DESC  OFFSET $2 LIMIT 10;`,
-                 [userId, (page*10)])).rows;
-
+                 ;`,[userId])).rows;
         }
 
         return response;
@@ -44,3 +37,13 @@ export const getPostsUser= async(res, userId, page, followStatus)=>{
         res.sendStatus(500)
     }
 }
+
+/* 
+SELECT u.username, u."pictureUrl", posts.*, 
+                COALESCE(COUNT(likes."postId"),0) AS "numberOfLikes",
+                COALESCE(COUNT(shares."postId"),0) AS "numberOfShares"
+                 FROM posts 
+                 LEFT JOIN users u ON posts."userId" = u.id
+                 LEFT JOIN likes ON likes."postId" = posts.id
+                 JOIN shares ON shares."postId" = posts.id
+                 GROUP BY u.id, posts.id  */

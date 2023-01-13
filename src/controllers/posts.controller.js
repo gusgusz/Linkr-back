@@ -8,26 +8,17 @@ import {checkFollowRepository, checkStatusFollow} from "../repositories/checkFol
 import { getPostsUser } from "../repositories/getPosts.js";
 
 export const getPosts = async (req, res) => {
-<<<<<<< HEAD
-  let {page} = req.query;
-  if(!page) page=0;
-  
-=======
 
   let {page} = req.query;
   if(!page) page = 0;
-
->>>>>>> main
+  page = page * 10;
+  console.log(page);
   const userId = res.locals.userId;
   try{
     const hashtags = await getTrandings();
     const followStatus = await checkStatusFollow(res, userId)
 
-<<<<<<< HEAD
-    const response = await getPostsUser(res,userId,followStatus, page);
-=======
-    const response = await getPostsUser(res,userId,followStatus,page);
->>>>>>> main
+    const response = await getPostsUser(res,userId, page, followStatus);
     
     if(response.rowCount === 0) {
       return res.status(404).send("There are no posts yet");
@@ -37,13 +28,13 @@ export const getPosts = async (req, res) => {
       const { url } = post;
       const metadata = await urlMetadata(url);
       const { title, description, image } = metadata;
-      return { ...post, title, description, image};
+      return { ...post, title, description, image, isRepost: false};
     }));
+   
+    res.status(200).send({hashtags, posts, followStatus});
+  } catch (err) {
     
-  res.status(200).send({hashtags, posts, followStatus});
-  } catch (error) {
-    
-    res.send(error.message)
+    res.status(500).send(err.message);
   } 
 }
 
@@ -87,6 +78,9 @@ export const postPosts = async (req, res) =>{
 
 export const getTrendingPosts = async (req, res) => {
   const hashtag = (req.params.hashtag).toLowerCase();
+   let {page} = req.query;
+  if(!page) page = 0;
+ 
  
   try{
     const hashtags = await getTrandings();
@@ -94,7 +88,7 @@ export const getTrendingPosts = async (req, res) => {
   if(hashtagId.rowCount === 0) return res.status(404).send("Hashtag not found");
     const response = (await connectionDb.query(`SELECT users.username, users."pictureUrl", posts.* FROM posts
     JOIN users ON posts."userId" = users.id
-    JOIN "hashtagPosts" ON posts.id = "hashtagPosts"."postId" WHERE "hashtagPosts"."hashtagId" = $1;`, [hashtagId.rows[0].id])).rows;
+    JOIN "hashtagPosts" ON posts.id = "hashtagPosts"."postId" WHERE "hashtagPosts"."hashtagId" = $1 ORDER BY posts."createdAt" DESC  OFFSET $2 LIMIT 10;`, [hashtagId.rows[0].id, page*10])).rows;
 
     const posts = await Promise.all(response.map(async (post) => {
     const { url } = post;
@@ -114,10 +108,12 @@ export const getUserPosts = async (req, res) => {
   const userId = req.params.userId;
  
  const hashtags = await getTrandings();
+  let {page} = req.query;
+  if(!page) page = 0;
+ 
   try{
-
-    const response = (await connectionDb.query(`SELECT users.username, users."pictureUrl", posts.* FROM posts JOIN  users ON posts."userId" = users.id WHERE posts."userId" = $1 ORDER BY posts."createdAt" DESC;`, [userId])).rows;
-
+    const response = (await connectionDb.query(`SELECT users.username, users."pictureUrl", posts.* FROM posts JOIN  users ON posts."userId" = users.id WHERE posts."userId" = $1 ORDER BY posts."createdAt" DESC OFFSET $2 LIMIT 10;`, [userId, page*10])).rows;
+    
     const posts = await Promise.all(response.map(async (post) => {
     const { url } = post;
     const metadata = await urlMetadata(url);
