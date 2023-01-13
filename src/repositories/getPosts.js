@@ -32,6 +32,6 @@ export const getPostsUser= async(res, userId, followStatus, page)=>{
         return response;
     }catch(error){
         console.log(error)
-        res,sendStatus(500)
+        res.sendStatus(500)
     }
 }

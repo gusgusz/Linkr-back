@@ -101,13 +101,11 @@ export const getTrendingPosts = async (req, res) => {
 
 export const getUserPosts = async (req, res) => {
   const userId = req.params.userId;
-  const userLog = res.locals.userId ;
  
  const hashtags = await getTrandings();
   try{
 
     const response = (await connectionDb.query(`SELECT users.username, users."pictureUrl", posts.* FROM posts JOIN  users ON posts."userId" = users.id WHERE posts."userId" = $1 ORDER BY posts."createdAt" DESC;`, [userId])).rows;
-    const userFollow = await checkFollowRepository(res, userId, userLog);
 
     const posts = await Promise.all(response.map(async (post) => {
     const { url } = post;
@@ -116,8 +114,8 @@ export const getUserPosts = async (req, res) => {
     delete post.createdAt;
     return { ...post, title, description, image };
   }));
-  console.log({hashtags, posts,userFollow})
-  res.status(200).send({hashtags, posts,userFollow});
+  
+  res.status(200).send({hashtags, posts});
   } catch (error) {
     res.status(500).send("An error occurred while trying to fetch the posts, please refresh the page");
   }
